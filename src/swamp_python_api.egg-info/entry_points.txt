@@ -1,3 +1,0 @@
-[console_scripts]
-swamp-api = swamp_api.__main__:main
-
