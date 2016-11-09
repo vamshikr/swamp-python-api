@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 import json
+import re
+import os.path as osp
 
 
 def _decode_list(data):
@@ -47,10 +49,40 @@ def json_loads(json_str):
     return json.loads(json_str, object_hook=_decode_dict)
 
 
-def write_to_file(filename, obj):
+def conf_to_dict(filepath):
+    '''filepath can be a list or a filepath'''
+
+    def get_line(filepath):
+
+        if isinstance(filepath, str) and osp.isfile(filepath):
+            with open(filepath) as fobj:
+                for line in fobj:
+                    yield line.strip('\n').strip()
+        elif isinstance(filepath, set) or isinstance(filepath, list):
+            # filepath is a list
+            for line in filepath:
+                yield line.strip('\n').strip()
+
+    re0 = re.compile(r'((?P<comment>^\s*#.*)|(?P<keyval>^\s*[^\s]+\s*=\s*.+)|(?P<blankline>^\s*))')
+    re1 = re.compile(r'^\s*(?P<key>[^\s]+?)\s*=(?P<value>\s*.+)')
+
+    conf_dict = {}
+
+    for line in get_line(filepath):
+        match = re0.match(line)
+        if match:
+            if match.groupdict()['keyval']:
+                m1 = re1.match(line)
+                key = m1.groupdict()['key']
+                value = m1.groupdict()['value'].strip('\n').strip()
+                conf_dict[key] = value
+
+    return conf_dict
+
+def write_to_file(filepath, obj):
     '''write a dictionary or list object to a file'''
 
-    with open(filename, 'w') as fobj:
+    with open(filepath, 'w') as fobj:
 
         if isinstance(obj, dict):
             for key in obj.keys():

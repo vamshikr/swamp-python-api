@@ -7,7 +7,6 @@ from functools import wraps
 
 import requests
 
-from . import confreader
 from . import common
 from . import types
 
@@ -89,7 +88,7 @@ class SwampApi:
 
         if 'user_info_file' in kwargs and \
            kwargs['user_info_file']:
-            user_info = confreader.read_conf_into_dict(kwargs['user_info_file'])
+            user_info = common.conf_to_dict(kwargs['user_info_file'])
         elif 'username' in kwargs and 'password' in kwargs:
             user_info = dict()
             user_info['username'] = kwargs['username']
@@ -248,7 +247,7 @@ class SwampApi:
         if isinstance(kwargs['pkg_conf'], str):
             if not osp.isfile(kwargs['pkg_conf']):
                 raise IOError(kwargs['pkg_conf'])
-            pkg_conf = confreader.read_conf_into_dict(kwargs['pkg_conf'])
+            pkg_conf = common.conf_to_dict(kwargs['pkg_conf'])
         else:
             pkg_conf = kwargs['pkg_conf']
 
