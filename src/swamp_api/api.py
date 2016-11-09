@@ -51,7 +51,7 @@ class SwampApi:
             return 3
         else:
             raise NotImplementedError
-        
+
     @classmethod
     def print_request(cls, request):
         for key in request.headers.keys():
@@ -60,21 +60,21 @@ class SwampApi:
     def __init__(self, cookie_dir):
         self.cookie_dir = cookie_dir
         self.csa_cookies = None
-        
+
     def save_cookies(self):
         with open(osp.join(self.cookie_dir, '.csa_cookies'), 'wb') as fobj:
             pickle.dump(self.csa_cookies, fobj)
-        
+
     def load_cookies(self):
 
         try:
             with open(osp.join(self.cookie_dir, '.csa_cookies'), 'rb') as fobj:
                 self.csa_cookies = pickle.load(fobj)
-        except FileNotFoundError as err:
+        except IOError:
             print('ERROR: login into SWAMP to get session cookies',
                   file=sys.stderr)
             raise
-            
+
     def use_cookies(func):
 
         @wraps(func)
@@ -86,7 +86,7 @@ class SwampApi:
         return wrapped
 
     def login(self, kwargs):
-        
+
         if 'user_info_file' in kwargs and \
            kwargs['user_info_file']:
             user_info = confreader.read_conf_into_dict(kwargs['user_info_file'])
@@ -106,7 +106,7 @@ class SwampApi:
             resp = requests.post('%s/login' % (SwampApi.CSA_SERVER),
                                  json=user_info,
                                  headers=SwampApi.JSON_HEADERS)
-            
+
             if resp.status_code != 200 or resp.reason != 'OK':
                 raise Exception(resp.status_code, resp.reason)
 
@@ -115,7 +115,7 @@ class SwampApi:
             # resp = requests.post('%s/login' % (SwampApi.CSA_SERVER),
             #                      json=user_info,
             #                      headers=SwampApi.JSON_HEADERS)
-            
+
             # if resp.status_code != 200 or resp.reason != 'OK':
             #     raise Exception(resp.status_code, resp.reason)
 
@@ -158,7 +158,7 @@ class SwampApi:
     def list_pkg_versions(self, kwargs):
 
         for pkg in self.list_pkgs(kwargs):
-            
+
             resp = requests.get('%s/packages/%s/versions' %
                                 (SwampApi.CSA_SERVER, pkg.package_uuid),
                                 headers=SwampApi.JSON_HEADERS,
@@ -218,7 +218,7 @@ class SwampApi:
             'config_cmd': pkg_conf.get('config-cmd', None),
             'config_opt': pkg_conf.get('config-opt', None),
             'build_file': pkg_conf.get('build-file',
-                                        SwampApi.get_default_build_file(pkg_conf['build-sys'])),
+                                       SwampApi.get_default_build_file(pkg_conf['build-sys'])),
             'build_system': pkg_conf['build-sys'],
             'build_target': pkg_conf.get('build-target', None),
             'build_dir': pkg_conf.get('build-dir', None),
@@ -231,7 +231,7 @@ class SwampApi:
     def upload(self, kwargs):
 
         if not osp.isfile(kwargs['archive']):
-            raise FileNotFoundError(kwargs['archive'])
+            raise IOError(kwargs['archive'])
 
         resp = requests.post('%s/packages/versions/upload' %
                              (SwampApi.CSA_SERVER),
@@ -244,10 +244,10 @@ class SwampApi:
 
         dest_path = common.json_decode(resp.json())['destination_path']
         uploaded_filename = common.json_decode(resp.json())['filename']
-        
+
         if isinstance(kwargs['pkg_conf'], str):
             if not osp.isfile(kwargs['pkg_conf']):
-                raise FileNotFoundError(kwargs['pkg_conf'])
+                raise IOError(kwargs['pkg_conf'])
             pkg_conf = confreader.read_conf_into_dict(kwargs['pkg_conf'])
         else:
             pkg_conf = kwargs['pkg_conf']
@@ -336,7 +336,7 @@ class SwampApi:
             'notify-when-complete': 'true' if kwargs['notify_when_complete'] is True else 'false',
             'assessment-run-uuids[]': assessment_run_uuid
         }
-        
+
         resp = requests.post('%s/run_requests/one-time' %
                              (SwampApi.CSA_SERVER),
                              headers=SwampApi.FORM_HEADERS,
@@ -347,7 +347,7 @@ class SwampApi:
             raise Exception(resp.status_code, resp.reason)
 
         return assessment_run_uuid
-        
+
     @use_cookies
     def get_execution_records(self, kwargs):
 
@@ -361,10 +361,8 @@ class SwampApi:
                             headers=SwampApi.FORM_HEADERS,
                             cookies=self.csa_cookies,
                             params=params)
-        
+
         if resp.status_code != 200 or resp.reason != 'OK':
             raise Exception(resp.status_code, resp.reason)
 
         return [record for record in resp.json()]
-
-

@@ -15,7 +15,7 @@ def process_cli_args():
     login_parser = subparsers.add_parser('login', help='login into SWAMP')
     login_parser.add_argument('--user-info-file',
                               help='user credentials filepath')
-    
+
     projects_parser = subparsers.add_parser('projects',
                                             help='Get the list of projects that you own')
     projects_parser.add_argument('--user-uuid', required=True, help='User UUID')
@@ -25,14 +25,14 @@ def process_cli_args():
     pkg_parser.add_argument('--project-uuid', required=True, help='Project UUID')
     pkg_parser.add_argument('--with-versions', required=False,
                             action='store_true', help='With Versions')
-    
+
     upload_parser = subparsers.add_parser('upload', help='Upload a package')
     upload_parser.add_argument('--archive', required=True, help='Package archive')
     upload_parser.add_argument('--pkg-conf', required=True, help='Package Conf')
     upload_parser.add_argument('--user-uuid', required=True, help='User UUID')
     upload_parser.add_argument('--project-uuid', required=True, help='Project UUID')
     upload_parser.add_argument('--package-uuid', required=False, help='Package UUID')
-    
+
     subparsers.add_parser('package-types', help='Get package types')
     subparsers.add_parser('platforms', help='Get platforms list')
 
@@ -52,9 +52,9 @@ def process_cli_args():
                                help='Notify when complete')
 
     records_parser = subparsers.add_parser('execution-records',
-                                            help='Get execution records for the project')
+                                           help='Get execution records for the project')
     records_parser.add_argument('--project-uuid', required=True, help='User UUID')
-    
+
     return main_parser
 
 
@@ -68,9 +68,9 @@ def main():
     else:
         parser.print_help()
         sys.exit(1)
-        
+
     api_client = SwampApi(os.getcwd())
-    
+
     if task == 'login':
         user_uuid = api_client.login(args)
         print(user_uuid)
@@ -85,13 +85,13 @@ def main():
             print(pkg.name, pkg.package_type, pkg.package_uuid,
                   pkg.package_type_id, pkg.version_strings)
             api_client.list_pkg_versions(args)
-            
+
     elif task == 'package-types':
         print(api_client.list_pkg_types())
     elif task == 'upload':
         print('package_version_uuid: %s\npackage_version_uuid: %s' % (api_client.upload(args)))
     elif task == 'tools':
-        for tool_name, tool_uuid in api_client.list_tools(args['public']==True):
+        for tool_name, tool_uuid in api_client.list_tools(args['public'] is True):
             print('%s (%s)' % (tool_name, tool_uuid))
     elif task == 'platforms':
         for plat_name, plat_uuid in api_client.list_platforms():

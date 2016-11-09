@@ -5,7 +5,7 @@ import json
 
 
 def _decode_list(data):
-    rv = []
+    new_data = []
     for item in data:
         if isinstance(item, unicode):
             item = item.encode('utf-8')
@@ -13,12 +13,12 @@ def _decode_list(data):
             item = _decode_list(item)
         elif isinstance(item, dict):
             item = _decode_dict(item)
-        rv.append(item)
-    return rv
+        new_data.append(item)
+    return new_data
 
 
 def _decode_dict(data):
-    rv = {}
+    new_data = {}
     for key, value in data.iteritems():
         if isinstance(key, unicode):
             key = key.encode('utf-8')
@@ -28,8 +28,8 @@ def _decode_dict(data):
             value = _decode_list(value)
         elif isinstance(value, dict):
             value = _decode_dict(value)
-        rv[key] = value
-    return rv
+        new_data[key] = value
+    return new_data
 
 
 def json_decode(json_obj):
@@ -63,9 +63,9 @@ def write_to_file(filename, obj):
 
 def print_curl_cmd(request):
     #print(vars(request))
-    print('curl',  end=' ')
-    print("'%s'" % (request.url), end=' ') 
-    print(' '.join( "-H '%s:%s'" % (key, request.headers[key]) \
-                    for key in request.headers.keys()), end=' ')
+    print('curl', end=' ')
+    print("'%s'" % (request.url), end=' ')
+    print(' '.join("-H '%s:%s'" % (key, request.headers[key])
+                   for key in request.headers.keys()), end=' ')
     print("--data '%s'" % (request.body))
     print("\n\n")
