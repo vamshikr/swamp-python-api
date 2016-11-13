@@ -7,7 +7,7 @@ from .api import SwampApi
 
 def process_cli_args():
 
-    main_parser = argparse.ArgumentParser(prog='swamp-api-client',
+    main_parser = argparse.ArgumentParser(prog='swamp-api',
                                           description='''Use any of the sub commands:''')
 
     subparsers = main_parser.add_subparsers(help='sub-command help')
