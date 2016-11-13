@@ -1,5 +1,7 @@
-# swamp-python-api
-Python API to access SWAMP (unofficial)
+# swamp-python-api (unofficial)
+Python API to access SWAMP
+
+> This is not an official SWAMP project
 
 Currently, the API supports uploading and assessment of *Java* packages in SWAMP. Support for other languages will be added soon.
 
